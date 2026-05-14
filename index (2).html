@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>One Step — Founder Milestone Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1f1f1f;
+    --surface3: #282828;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #f0ede8;
+    --text2: #9a9690;
+    --text3: #5c5a57;
+    --green: #3ecf8e;
+    --green-dim: #1a4a36;
+    --green-bg: rgba(62,207,142,0.08);
+    --red: #ff6b6b;
+    --red-bg: rgba(255,107,107,0.08);
+    --amber: #f5a623;
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+
+  html { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 16px; }
+  body { min-height: 100vh; padding: 2rem 1rem 4rem; max-width: 680px; margin: 0 auto; }
+
+  /* HEADER */
+  .site-header { margin-bottom: 3rem; }
+  .site-header h1 { font-size: clamp(28px, 6vw, 42px); font-weight: 300; letter-spacing: -0.02em; color: var(--text); line-height: 1.15; }
+  .site-header h1 em { font-style: italic; color: var(--green); }
+  .site-header p { margin-top: 10px; font-size: 14px; color: var(--text2); line-height: 1.6; max-width: 480px; }
+
+  /* PROJECT INPUT */
+  .project-input { display: flex; gap: 8px; margin-bottom: 2.5rem; }
+  .project-input input {
+    flex: 1; background: var(--surface); border: 1px solid var(--border2);
+    border-radius: var(--radius); padding: 0 16px; height: 44px; font-size: 14px;
+    font-family: 'DM Mono', monospace; color: var(--text); outline: none; transition: border 0.2s;
+  }
+  .project-input input::placeholder { color: var(--text3); }
+  .project-input input:focus { border-color: var(--green); }
+  .project-input button {
+    background: var(--green); color: #0d0d0d; border: none; border-radius: var(--radius);
+    padding: 0 20px; height: 44px; font-size: 13px; font-weight: 500; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: opacity 0.15s; white-space: nowrap;
+  }
+  .project-input button:hover { opacity: 0.85; }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 2rem;
+  }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+  .stat-card .num { font-size: 26px; font-weight: 500; color: var(--green); font-family: 'DM Mono', monospace; }
+  .stat-card .lbl { font-size: 11px; color: var(--text3); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* PROGRESS */
+  .progress-section { margin-bottom: 2rem; }
+  .progress-label { font-size: 12px; color: var(--text3); margin-bottom: 8px; display: flex; justify-content: space-between; }
+  .progress-track { height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 4px; background: var(--green); border-radius: 2px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
+
+  /* MILESTONES */
+  .section-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+  .milestones { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; margin-bottom: 2rem; }
+  .milestone {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px; cursor: pointer; transition: border-color 0.15s, background 0.15s; position: relative;
+    user-select: none;
+  }
+  .milestone:hover { border-color: var(--border2); }
+  .milestone.active { border-color: var(--green); background: var(--green-bg); }
+  .milestone.done { border-color: var(--green-dim); background: rgba(26,74,54,0.3); }
+  .milestone.done .m-num { color: var(--green); }
+  .milestone.active .m-num { color: var(--green); }
+  .m-num { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--text3); margin-bottom: 4px; }
+  .m-label { font-size: 12px; font-weight: 500; color: var(--text); }
+  .m-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .m-check { position: absolute; top: 10px; right: 10px; width: 16px; height: 16px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .m-check svg { width: 9px; height: 9px; stroke: #0d0d0d; stroke-width: 2.5; fill: none; }
+
+  /* COMPLETE BUTTON */
+  .complete-btn {
+    width: 100%; background: transparent; border: 1px solid var(--border2); border-radius: var(--radius);
+    padding: 12px; font-size: 13px; color: var(--text2); cursor: pointer; font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s; margin-bottom: 2rem; display: none;
+  }
+  .complete-btn:hover { border-color: var(--green); color: var(--green); }
+
+  /* TABS */
+  .tabs { display: flex; gap: 6px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .tab {
+    font-size: 12px; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border);
+    background: transparent; color: var(--text3); cursor: pointer; font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .tab:hover { border-color: var(--border2); color: var(--text2); }
+  .tab.active { background: var(--green); color: #0d0d0d; border-color: var(--green); font-weight: 500; }
+
+  /* CONTENT PANELS */
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .panel-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; }
+
+  /* ADVICE ITEMS */
+  .advice-list { display: flex; flex-direction: column; gap: 8px; }
+  .advice-item {
+    display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px;
+    background: var(--surface2); border-radius: var(--radius);
+  }
+  .advice-item .icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .advice-item p { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .advice-item p strong { color: var(--text); font-weight: 500; }
+
+  /* WARNING */
+  .warning-box {
+    display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px;
+    background: var(--red-bg); border: 1px solid rgba(255,107,107,0.2); border-radius: var(--radius);
+    margin-bottom: 1rem;
+  }
+  .warning-box .icon { color: var(--red); font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .warning-box p { font-size: 13px; color: #ff9a9a; line-height: 1.5; }
+
+  /* QUOTES */
+  .quote-block {
+    border-left: 2px solid var(--green-dim); padding: 10px 16px; margin-bottom: 12px;
+    background: var(--green-bg); border-radius: 0 var(--radius) var(--radius) 0;
+  }
+  .quote-block blockquote { font-size: 14px; color: var(--text2); line-height: 1.7; font-style: italic; }
+  .quote-block cite { font-size: 12px; color: var(--text3); font-style: normal; display: block; margin-top: 6px; }
+
+  /* FOOTER */
+  footer { margin-top: 3rem; text-align: center; font-size: 12px; color: var(--text3); }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--green); color: #0d0d0d; padding: 10px 20px; border-radius: 20px;
+    font-size: 13px; font-weight: 500; transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+    pointer-events: none; white-space: nowrap; z-index: 100;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 480px) {
+    .stats-bar { grid-template-columns: repeat(3, 1fr); }
+    .stat-card .num { font-size: 20px; }
+    .milestones { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="site-header">
+  <h1>Just take <em>that</em> step.</h1>
+  <p>The graveyard is full of builders who never shipped distribution. You won't be one of them. One milestone. One action. Today.</p>
+</div>
+
+<div class="project-input">
+  <input type="text" id="projectInput" placeholder="what are you building right now?" />
+  <button onclick="lockProject()">Lock it in →</button>
+</div>
+
+<div id="main" style="display:none">
+
+  <div class="stats-bar">
+    <div class="stat-card"><div class="num" id="statUsers">0</div><div class="lbl">target users</div></div>
+    <div class="stat-card"><div class="num" id="statStreak">0</div><div class="lbl">day streak</div></div>
+    <div class="stat-card"><div class="num" id="statDone">0/7</div><div class="lbl">milestones</div></div>
+  </div>
+
+  <div class="progress-section">
+    <div class="progress-label">
+      <span id="progressText">milestone 1 of 7</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="section-label">your milestones</div>
+  <div class="milestones" id="milestoneGrid"></div>
+
+  <button class="complete-btn" id="completeBtn" onclick="markDone()">✓ mark current milestone done — keep going</button>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('now',this)">do this now</button>
+    <button class="tab" onclick="switchTab('trap',this)">builder trap</button>
+    <button class="tab" onclick="switchTab('quotes',this)">fuel</button>
+    <button class="tab" onclick="switchTab('sales',this)">founder sales</button>
+  </div>
+
+  <div id="panel-now" class="panel active">
+    <div class="panel-card">
+      <div class="section-label" style="margin-bottom:12px">distribution actions — pick one and do it before you code</div>
+      <div class="advice-list" id="adviceNow"></div>
+    </div>
+  </div>
+
+  <div id="panel-trap" class="panel">
+    <div class="panel-card">
+      <div class="warning-box">
+        <span class="icon">⚠</span>
+        <p>You are likely doing this right now. Read it. Recognize it. Stop.</p>
+      </div>
+      <div class="advice-list" id="adviceTrap"></div>
+    </div>
+  </div>
+
+  <div id="panel-quotes" class="panel">
+    <div class="panel-card" id="quotesPanel"></div>
+  </div>
+
+  <div id="panel-sales" class="panel">
+    <div class="panel-card">
+      <div class="section-label" style="margin-bottom:12px">founder sales — the thing you keep skipping</div>
+      <div class="advice-list" id="adviceSales"></div>
+    </div>
+  </div>
+
+</div>
+
+<footer>built for founders who build too much and distribute too little</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+const MILESTONES = [
+  { n: "1", label: "1 real user", sub: "not mom, not a friend" },
+  { n: "5", label: "5 users", sub: "word of mouth begins" },
+  { n: "10", label: "10 users", sub: "find the pattern" },
+  { n: "50", label: "50 users", sub: "first retention signal" },
+  { n: "100", label: "100 users", sub: "do things that don't scale" },
+  { n: "500", label: "500 users", sub: "channel confirmed" },
+  { n: "1k", label: "1,000 users", sub: "escape velocity" }
+];
+
+const USER_COUNTS = [1, 5, 10, 50, 100, 500, 1000];
+
+const ADVICE = [
+  [
+    "<strong>DM 20 strangers</strong> who have the exact problem. Not a link. Just: \"I'm building something for [problem] — are you dealing with this?\"",
+    "<strong>Find one Reddit/Discord</strong> where your user lives. Post something genuinely helpful today. Zero pitch.",
+    "<strong>Post your idea on X or LinkedIn</strong> and ask for the hardest possible feedback. Reply to everyone."
+  ],
+  [
+    "<strong>Ask each user:</strong> \"Who else should I talk to?\" Then contact those people before end of day.",
+    "<strong>Write about the problem</strong> — not your product. Post it where your users are.",
+    "<strong>Get on a call</strong> with someone who hasn't signed up. Ask only: why not?"
+  ],
+  [
+    "<strong>Find the difference</strong> between your best user and your average user. Build only for the best one.",
+    "<strong>Build a referral loop:</strong> can users invite someone naturally without you asking?",
+    "<strong>Send 50 cold emails</strong> to people who match your best user profile. Personalize each one."
+  ],
+  [
+    "<strong>Find the one channel</strong> driving 80% of your signups. Double your effort there. Cut the rest.",
+    "<strong>Publish something</strong> that teaches your user something they care about — thread, post, video.",
+    "<strong>Partner with one product</strong> your users already use. Reach their audience."
+  ],
+  [
+    "<strong>Stop building features</strong> nobody asked for. Ask 10 users what they'd pay for. Build that.",
+    "<strong>Run a basic NPS.</strong> Find who loves you and why. Find who left and why.",
+    "<strong>Talk to 5 churned users.</strong> Their reason will change everything."
+  ],
+  [
+    "<strong>Document your acquisition playbook.</strong> What worked? Make it repeatable.",
+    "<strong>Look for your first press mention or podcast.</strong> Reach out today.",
+    "<strong>Hire or partner</strong> for the one channel that's working. You've earned it."
+  ],
+  [
+    "<strong>You've earned the right to think about scale.</strong> But keep talking to users every single week.",
+    "<strong>Document what worked.</strong> Teach it. Write it down. Share it.",
+    "<strong>Set the next 10x milestone.</strong> Same process. Start over."
+  ]
+];
+
+const TRAPS = [
+  [
+    "<strong>Building feature #23</strong> instead of talking to 10 users. Talking to users is the job.",
+    "<strong>Polishing the UI</strong> when zero people have signed up. Ship it broken.",
+    "<strong>Waiting to launch</strong> because it's \"not ready yet.\" It never will be. Ship today."
+  ],
+  [
+    "<strong>Adding AI features</strong> instead of distributing what you already built.",
+    "<strong>Rewriting the landing page</strong> for the fourth time this week.",
+    "<strong>\"I'll do sales after I fix this one bug.\"</strong> That bug will be replaced by another."
+  ],
+  [
+    "<strong>Thinking it's too early for distribution.</strong> It was the right time six months ago.",
+    "<strong>Measuring DAUs</strong> when you should be doing founder sales.",
+    "<strong>Comparing yourself to Series B startups.</strong> You are at Day 1. Different game."
+  ],
+  [
+    "<strong>Hiring before you have a repeatable sales process.</strong> You can't hire your way to distribution.",
+    "<strong>Saying your users are \"everywhere.\"</strong> They aren't. Find exactly where they are.",
+    "<strong>Building in stealth.</strong> Every week in stealth is a week of zero distribution feedback."
+  ],
+  [
+    "<strong>Thinking a great product sells itself.</strong> It doesn't. Not at your stage. Not ever.",
+    "<strong>Skipping the call and sending a form instead.</strong> Calls give you 10x the signal.",
+    "<strong>Letting a week pass without one new user conversation.</strong> Schedule it now."
+  ],
+  [
+    "<strong>Optimizing conversion</strong> before you have a consistent traffic source.",
+    "<strong>Chasing press</strong> before you have 100 happy users. Press won't save a broken distribution.",
+    "<strong>Over-investing in one channel</strong> before you've tested at least 3."
+  ],
+  [
+    "<strong>Thinking you're past the basics.</strong> Distribution compounds — the basics never stop.",
+    "<strong>Delegating user conversations</strong> entirely. Stay close to users forever.",
+    "<strong>Celebrating milestones without understanding exactly why you hit them.</strong> Know the cause."
+  ]
+];
+
+const QUOTES = [
+  { q: "Shift your focus away from what you want — a billion dollars — and get deeply, intensely curious about what the world wants and needs.", a: "Justine Musk" },
+  { q: "\"I can't see a way through,\" said the boy. \"Can you see your next step?\" \"Yes.\" \"Just take that,\" said the horse.", a: "The Boy, the Mole, the Fox and the Horse" },
+  { q: "Do things that don't scale. Ring doorbells. Talk to users. Send the cold emails yourself.", a: "Paul Graham" },
+  { q: "The single most common mistake founders make: building something nobody wants. The antidote is talking to users obsessively, before and after you build.", a: "Y Combinator" },
+  { q: "The startups that win distribution, win. Full stop. Most founders treat it as an afterthought. That's why most startups fail.", a: "Peter Thiel, Zero to One" },
+  { q: "Your job is not to build the product. Your job is to find out what to build.", a: "Steve Blank, The Four Steps to the Epiphany" },
+  { q: "Most founders die in the gap between building and selling. Cross it early. Cross it yourself.", a: "Traction — Gabriel Weinberg" }
+];
+
+const SALES = [
+  "<strong>Founder sales is not optional.</strong> You must sell before you hire anyone to sell. Nobody cares about the problem like you do. Nobody ever will.",
+  "<strong>The script that works:</strong> \"I'm building something to help [them] with [problem]. Can I get 15 minutes? Not pitching — just learning.\" Send it 50 times today.",
+  "<strong>The Epiphany Loop (Steve Blank):</strong> talk to 100 customers → find the pattern → pivot your positioning → repeat. Most founders stop at 5. Get to 100.",
+  "<strong>Traction channels (Gabriel Weinberg):</strong> try cold outreach, content, communities, SEO, partnerships. One will pull 10x harder than the rest. Go all in on that one.",
+  "<strong>The 50/50 rule:</strong> 50% of your time on product, 50% on distribution. If you're at 90/10 building — you are already failing distribution. Fix the ratio today.",
+  "<strong>The founder advantage:</strong> users will take a call from a founder that they'd ignore from a salesperson. Use this window. It closes when you scale."
+];
+
+let state = {
+  project: "",
+  current: 0,
+  streak: 0,
+};
+
+function loadState() {
+  try {
+    const s = JSON.parse(localStorage.getItem("founderState") || "{}");
+    if (s.project) state = { ...state, ...s };
+  } catch(e) {}
+}
+
+function saveState() {
+  try { localStorage.setItem("founderState", JSON.stringify(state)); } catch(e) {}
+}
+
+function lockProject() {
+  const v = document.getElementById("projectInput").value.trim();
+  if (!v) { document.getElementById("projectInput").focus(); return; }
+  state.project = v;
+  saveState();
+  showMain();
+}
+
+function showMain() {
+  document.getElementById("projectInput").value = state.project;
+  document.getElementById("main").style.display = "block";
+  document.getElementById("completeBtn").style.display = "block";
+  render();
+}
+
+function render() {
+  const idx = Math.min(state.current, MILESTONES.length - 1);
+  // stats
+  document.getElementById("statUsers").textContent = USER_COUNTS[state.current - 1] || 0;
+  document.getElementById("statStreak").textContent = state.streak;
+  document.getElementById("statDone").textContent = state.current + "/" + MILESTONES.length;
+  // progress
+  const pct = Math.round((state.current / MILESTONES.length) * 100);
+  document.getElementById("progressFill").style.width = pct + "%";
+  document.getElementById("progressPct").textContent = pct + "%";
+  document.getElementById("progressText").textContent = "milestone " + (idx + 1) + " of " + MILESTONES.length;
+  // milestones
+  const grid = document.getElementById("milestoneGrid");
+  grid.innerHTML = MILESTONES.map((m, i) => {
+    const done = i < state.current;
+    const active = i === state.current;
+    return `<div class="milestone ${done ? 'done' : active ? 'active' : ''}" onclick="jumpTo(${i})">
+      ${done ? '<div class="m-check"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>' : ''}
+      <div class="m-num">${m.n}</div>
+      <div class="m-label">${m.label}</div>
+      <div class="m-sub">${m.sub}</div>
+    </div>`;
+  }).join('');
+  // advice
+  const ai = Math.min(idx, ADVICE.length - 1);
+  document.getElementById("adviceNow").innerHTML = ADVICE[ai].map(a =>
+    `<div class="advice-item"><span class="icon">→</span><p>${a}</p></div>`
+  ).join('');
+  const ti = Math.min(Math.floor(idx / 2), TRAPS.length - 1);
+  document.getElementById("adviceTrap").innerHTML = TRAPS[ti].map(t =>
+    `<div class="advice-item"><span class="icon" style="color:var(--red)">✕</span><p>${t}</p></div>`
+  ).join('');
+  // quotes
+  document.getElementById("quotesPanel").innerHTML = QUOTES.map(q =>
+    `<div class="quote-block"><blockquote>"${q.q}"</blockquote><cite>— ${q.a}</cite></div>`
+  ).join('');
+  // founder sales
+  document.getElementById("adviceSales").innerHTML = SALES.map(s =>
+    `<div class="advice-item"><span class="icon" style="color:var(--amber)">◆</span><p>${s}</p></div>`
+  ).join('');
+}
+
+function jumpTo(i) {
+  state.current = i;
+  saveState();
+  render();
+}
+
+function markDone() {
+  if (state.current < MILESTONES.length) {
+    state.current++;
+    state.streak++;
+    saveState();
+    render();
+    const m = MILESTONES[state.current - 1];
+    showToast("milestone done: " + m.label + " 🟢 keep going.");
+  }
+}
+
+function switchTab(name, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById("panel-" + name).classList.add('active');
+  el.classList.add('active');
+}
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3000);
+}
+
+// init
+loadState();
+if (state.project) { showMain(); } else { document.getElementById("projectInput").focus(); }
+</script>
+</body>
+</html>
